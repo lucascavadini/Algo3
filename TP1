@@ -1,0 +1,151 @@
+#include<iostream>
+#include<algorithm>
+#include<vector>
+using namespace std;
+
+// Variables globales
+/*
+int testcase = 1;
+int n=2;
+int m=2;
+vector<vector<char>> tablero = {{'+','#'},{'#','L'}};
+ */
+char pieza;
+vector<vector<char>> tablero;
+vector<vector<bool>> tYaPase;
+int minimo = 0;
+int maximo = 0;
+char piezaVacia = '#';
+int testcase,n,m;
+
+bool fueraDeRango(int x, int y){ // da true si esta fuera de rango
+    if(x > n-1 || x < 0 || y > m-1 || y < 0) return true;
+    return false;
+}
+
+void sendero(int x, int y, int fa,int ca, int contador){ // x = fila actual, y = columna actual, f1 = fila anterior  c1= columna anterior.
+    char actual;
+    if(fueraDeRango(x,y)){
+        return;
+    } else {
+        actual = tablero[x][y];
+    }
+    if(tablero[n-1][m-1] == piezaVacia){
+        return;
+    }
+    if(x == n-1 && y == m-1) {
+        if(maximo < contador) maximo = contador;
+        if(minimo > contador) minimo = contador;
+        return;
+    }
+    if (tYaPase[x][y] || actual == piezaVacia) {
+        return;
+    } else {
+        contador++; //significa que el movimiento que hicimos era valido asique contamos un paso mas
+        tYaPase[x][y] = true;
+        if(fa < x) {     // me muevo de arriba a abajo
+            if (actual == 'I'){
+                sendero(x+1,y,x,y,contador);
+                tYaPase[x][y] = false;
+            } else if (actual == 'L'){
+                sendero(x,y+1,x,y,contador);
+                sendero(x,y-1,x,y,contador);
+                tYaPase[x][y] = false;
+            } else {    //si es un "+"
+                sendero(x+1,y,x,y,contador);
+                sendero(x,y+1,x,y,contador);
+                sendero(x,y-1,x,y,contador);
+                tYaPase[x][y] = false;
+            }
+        } else if (fa > x) {      // me muevo de abajo a arriba
+            if (actual == 'I'){
+                sendero(x-1,y,x,y,contador);
+                tYaPase[x][y] = false;
+            } else if (actual == 'L'){
+                sendero(x,y+1,x,y,contador);
+                sendero(x,y-1,x,y,contador);
+                tYaPase[x][y] = false;
+            } else {    //si es un "+"
+                sendero(x,y+1,x,y,contador);
+                sendero(x,y-1,x,y,contador);
+                sendero(x-1,y,x,y,contador);
+                tYaPase[x][y] = false;
+            }
+        } else if (ca < y) {      // me muevo de izquierda a derecha
+            if (actual == 'I'){
+                sendero(x,y+1,x,y,contador);
+                tYaPase[x][y] = false;
+            } else if (actual == 'L'){
+                sendero(x+1,y,x,y,contador);
+                sendero(x-1,y,x,y,contador);
+                tYaPase[x][y] = false;
+            } else {    //si es un "+"
+                sendero(x,y+1,x,y,contador);
+                sendero(x+1,y,x,y,contador);
+                sendero(x-1,y,x,y,contador);
+                tYaPase[x][y] = false;
+            }
+        } else {    // me muevo de derecha a izquierda
+            if (actual == 'I'){
+                sendero(x,y-1,x,y,contador);
+                tYaPase[x][y] = false;
+            } else if (actual == 'L'){
+                sendero(x+1,y,x,y,contador);
+                sendero(x-1,y,x,y,contador);
+                tYaPase[x][y] = false;
+            } else {    //si es un "+"
+                sendero(x,y-1,x,y,contador);
+                sendero(x+1,y,x,y,contador);
+                sendero(x-1,y,x,y,contador);
+                tYaPase[x][y] = false;
+            }
+        }
+    }
+}
+
+
+
+int main(){
+    //CASO 1 DE LOS TEST DEL ENUNCIADO
+/*
+    while(testcase--){ // recorro los caso de prueba
+        tYaPase.resize(n);
+        for(int h = 0; h<n;h++){
+            tYaPase[h].resize(m);
+        }
+        for(int i= 0;i<n;i++){
+            for(int j= 0;j<m;j++){
+                tYaPase[i][j] = false;
+            }
+        }
+*/
+
+    scanf("%d",&testcase);
+    while(testcase--){ // recorro los caso de prueba
+        scanf("%d" "%d",&n,&m); // input fila y columna
+        tablero.resize(n);
+        tYaPase.resize(n);
+        for(int h = 0; h<n;h++){
+            tablero[h].resize(m);
+            tYaPase[h].resize(m);
+        }
+        for(int i= 0;i<n;i++){
+            for(int j= 0;j<m;j++){
+                cin >> pieza;
+                tablero[i][j] = pieza;
+                tYaPase[i][j] = false;
+            }
+        }
+
+        minimo = 1000000;
+        maximo = 0;
+        sendero(0,0,-1,0,0);
+        sendero(0,0,0,-1,0);
+        if(maximo == 0 || minimo == 1000000){
+            printf("IMPOSIBLE \n");
+        }else{
+            printf("POSIBLE %d %d \n", minimo,maximo);
+        }
+    }
+    return 0;
+}
